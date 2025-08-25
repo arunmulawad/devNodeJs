@@ -1,22 +1,14 @@
 const express = require("express")
-const app= express()
+const app = express()
 
-app.get("/home",(req,res)=>{
-    res.send({name:"arun"})
-})
-app.patch("/home",(req,res)=>{
-    res.send("this is patch")
-})
-app.post("/home",(req,res)=>{
-    res.send("this is post")
-})
-app.delete("/home",(req,res)=>{
-    res.send("this is delete")
+app.get("/home/:userId/:name/:pass", (req, res) => {
+    const { userId, name, pass } = req.params
+    const { product } = req.query
+    console.log({ userId, name, pass, product })
+    res.send({ name: "arun" })
+
 })
 
-// app.use("/",(req,res)=>{
-//     res.send("welcome to Default")
-// })
-app.listen(4000,()=>{
+app.listen(4000, () => {
     console.log("server running successfully at Port 4000")
 })
