@@ -1,19 +1,16 @@
 const express = require("express")
-const { authCheck, adminCheck } = require("./Middlewares/auth")
 const app = express()
 
-app.get("/user/login", (req, res) => {
+app.get("/user", (req, res, next) => {
+    throw new Error("aaaa")
     res.send("logged on")
+})
 
-})
-app.get("/user/get", authCheck, (req, res) => {
-    res.send("user get")
-})
-app.get("/user/post", authCheck, (req, res) => {
-    res.send("user post")
-})
-app.get("/admin/getData", adminCheck, (req, res) => {
-    res.send("admin data")
+app.use("/", (err, req, res, next) => {
+    console.log("err", err)
+    if (err) {
+        res.status(500).send("An Error Occured")
+    }
 })
 
 
