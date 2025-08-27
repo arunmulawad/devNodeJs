@@ -18,6 +18,30 @@ app.post("/signup", async (req, res) => {
 
 })
 
+app.delete("/user", async (req, res) => {
+    // const userId = req.body.userId
+    // const data = await User.findByIdAndDelete(userId)  OR
+    const user = req.body
+    try {
+        const data = await User.findOneAndDelete({ age: user.age })
+        res.send("deleted successfully")
+    } catch (err) {
+        res.status(400).send("An Error Occured" + err)
+    }
+})
+
+app.patch("/user", async (req, res) => {
+    const user = req.body
+    try {
+        // const data = await User.findByIdAndUpdate(user?.userId, user, { returnDocument: "after" })
+        const data = await User.findOneAndUpdate({ firstName: "arunn" }, user, { returnDocument: "after" })
+        console.log(data)
+        res.send("Updated successfully" + data)
+    } catch (err) {
+        res.status(400).send("An Error Occured" + err)
+    }
+})
+
 app.get("/user", async (req, res) => {
     const user = req.body
     const data = await User.findOne({ eMail: user.eMail })
