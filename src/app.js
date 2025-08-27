@@ -30,15 +30,24 @@ app.delete("/user", async (req, res) => {
     }
 })
 
-app.patch("/user", async (req, res) => {
-    const user = req.body
+app.patch("/user/:userId", async (req, res) => {
+    const userId = req.params?.userId
+    const userData = req.body
+
     try {
-        // const data = await User.findByIdAndUpdate(user?.userId, user, { returnDocument: "after" })
-        const data = await User.findOneAndUpdate({ firstName: "arunn" }, user, { returnDocument: "after" })
-        console.log(data)
+        const ALLOWED_UPDATES = ["age", "eMail", "skills"]
+        const dataUpdate = Object.keys(userData).every((f) => ALLOWED_UPDATES.includes(f))
+        if (!dataUpdate) {
+            throw new Error("Cannot Be Update")
+        }
+        if (userData?.skills?.length > 10) {
+            throw new Error("Cannot Be added more than 10")
+        }
+        const data = await User.findByIdAndUpdate(userId, userData, { returnDocument: "after", runValidators: true })
+        // const data = await User.findOneAndUpdate({ firstName: "arunn" }, user, { returnDocument: "after" })
         res.send("Updated successfully" + data)
     } catch (err) {
-        res.status(400).send("An Error Occured" + err)
+        res.status(400).send("Update Failed " + err)
     }
 })
 
