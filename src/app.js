@@ -2,11 +2,10 @@ const express = require("express")
 const { connectDb } = require("./config/database")
 const User = require("./models/user")
 
-
-
 const app = express()
 app.use(express.json())
-app.post("/user/signup", async (req, res) => {
+
+app.post("/signup", async (req, res) => {
     const user = new User(req.body)
     try {
         await user.save()
@@ -17,6 +16,25 @@ app.post("/user/signup", async (req, res) => {
 
     }
 
+})
+
+app.get("/user", async (req, res) => {
+    const user = req.body
+    const data = await User.findOne({ eMail: user.eMail })
+    try {
+        res.send(data)
+    } catch (err) {
+        res.status(400).send("An Error Occured" + err)
+    }
+})
+app.get("/feed", async (req, res) => {
+    const user = req.body
+    const data = await User.find({})
+    try {
+        res.send(data)
+    } catch (err) {
+        res.status(400).send("An Error Occured" + err)
+    }
 })
 
 connectDb().then((res) => {
