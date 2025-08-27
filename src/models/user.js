@@ -12,7 +12,7 @@ const userSchema = new mongoose.Schema({
     lastName: {
         type: String
     },
-    eMail: {
+    emailId: {
         type: String,
         lowercase: true,
         required: true,
@@ -21,6 +21,16 @@ const userSchema = new mongoose.Schema({
         validate(value) {
             if (!validator.isEmail(value)) {
                 throw new Error("wrong email address " + value)
+            }
+        }
+    },
+    password: {
+        type: String,
+        required: true,
+        minLength: 8,
+        validate(value) {
+            if (!validator.isStrongPassword(value)) {
+                throw new Error("Please Enter Strong Password " + value)
             }
         }
     },
@@ -36,15 +46,16 @@ const userSchema = new mongoose.Schema({
             }
         }
     },
-    phote: {
+    photo: {
         type: String,
         default: "https://png.pngtree.com/png-vector/20240715/ourmid/pngtree-man-profile-icon-silhouette-of-businessman-face-profile-vector-png-image_7058983.png"
     },
+    about: {
+        type: String,
+        default: "Add Description"
+    },
     dateOfBirth: {
         type: Date
-    },
-    isIndian: {
-        type: Boolean
     },
     skills: {
         type: []
