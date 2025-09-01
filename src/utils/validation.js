@@ -12,4 +12,11 @@ const validationSignUpData = (req) => {
 
     }
 }
-module.exports = { validationSignUpData }
+const validateProfileEdit = (req) => {
+    const validateFieldEdit = ["firstName", "lastName", "skills", "about", "age", "photo"]
+    const isValidated = Object.keys(req.body).every(fields => validateFieldEdit.includes(fields))
+    if (!isValidated) {
+        throw new Error("Invalid Fields to Edit")
+    }
+}
+module.exports = { validationSignUpData, validateProfileEdit }
