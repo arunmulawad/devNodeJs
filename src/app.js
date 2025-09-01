@@ -3,9 +3,16 @@ const { connectDb } = require("./config/database")
 const User = require("./models/user")
 const { validationSignUpData } = require("./utils/validation")
 const bcrypt = require("bcrypt")
+const cookieParser = require("cookie-parser")
+const { userAuth } = require("./Middlewares/auth")
 
 const app = express()
+
+// Fetch JSON Body from API
 app.use(express.json())
+
+// Fetch Cookie from Request
+app.use(cookieParser())
 
 app.post("/signup", async (req, res) => {
     try {
@@ -30,15 +37,17 @@ app.post("/signup", async (req, res) => {
 app.post("/login", async (req, res) => {
     const { emailId, password } = req.body
     try {
-        const isUseExists = await User.findOne({ emailId: emailId })
-        if (!isUseExists) {
+        const user = await User.findOne({ emailId: emailId })
+        if (!user) {
             throw new Error("Invalid Credentials")
         }
-        const validatePassword = await bcrypt.compare(password, isUseExists.password)
+        const validatePassword = await user.validatePassword(password)
         if (validatePassword) {
+            // create JWT Token
+            const token = await user.getJWT()
 
-            // create Token
-            res.cookie("Token", "123123324536657fgf")
+            // send Token into COOKIES
+            res.cookie("token", token, { expires: new Date(Date.now() + 1 * 3600000) })
             res.send("Logged In successfully ")
         } else {
             throw new Error("Invalid Credentials")
@@ -49,66 +58,23 @@ app.post("/login", async (req, res) => {
     }
 })
 // PROFILE
-app.get("/profile", async (req, res) => {
-    const { emailId, password } = req.body
+app.get("/profile", userAuth, async (req, res) => {
     try {
-
-        const token = req.cookies
-        console.log(token)
+        const user = req.user
+        res.send("cookie got" + user)
     }
     catch (err) {
         res.status(400).send("ERROR : " + err)
     }
 })
-app.delete("/user", async (req, res) => {
-    // const userId = req.body.userId
-    // const data = await User.findByIdAndDelete(userId)  OR
-    const user = req.body
+app.post("/sendConnectionRequest", userAuth, (req, res) => {
     try {
-        const data = await User.findOneAndDelete({ age: user.age })
-        res.send("deleted successfully")
-    } catch (err) {
-        res.status(400).send("An Error Occured" + err)
-    }
-})
+        const { firstName } = req.user
+        res.send(firstName + " is sent the connection request")
 
-app.patch("/user/:userId", async (req, res) => {
-    const userId = req.params?.userId
-    const userData = req.body
+    } catch (error) {
+        res.status(400).send("ERROR : " + error)
 
-    try {
-        const ALLOWED_UPDATES = ["age", "emailId", "skills"]
-        const dataUpdate = Object.keys(userData).every((f) => ALLOWED_UPDATES.includes(f))
-        if (!dataUpdate) {
-            throw new Error("Cannot Be Update")
-        }
-        if (userData?.skills?.length > 10) {
-            throw new Error("Cannot Be added more than 10")
-        }
-        const data = await User.findByIdAndUpdate(userId, userData, { returnDocument: "after", runValidators: true })
-        // const data = await User.findOneAndUpdate({ firstName: "arunn" }, user, { returnDocument: "after" })
-        res.send("Updated successfully" + data)
-    } catch (err) {
-        res.status(400).send("Update Failed " + err)
-    }
-})
-
-app.get("/user", async (req, res) => {
-    const user = req.body
-    const data = await User.findOne({ emailId: user.emailId })
-    try {
-        res.send(data)
-    } catch (err) {
-        res.status(400).send("An Error Occured" + err)
-    }
-})
-app.get("/feed", async (req, res) => {
-    const user = req.body
-    const data = await User.find({})
-    try {
-        res.send(data)
-    } catch (err) {
-        res.status(400).send("An Error Occured" + err)
     }
 })
 

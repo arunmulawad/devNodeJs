@@ -1,21 +1,24 @@
-const authCheck = (req, res, next) => {
-    const isAuthValid = "token" === "token"
-    console.log("auth is called")
-    if (!isAuthValid) {
-        res.status(401).send("UnAuthorized user")
-    } else {
+const jwt = require("jsonwebtoken")
+const User = require("../models/user")
+
+const userAuth = async (req, res, next) => {
+    try {
+        const { token } = await req.cookies
+        if (!token) {
+            throw new Error("Invalid Token !!!")
+        }
+        const decodedObj = jwt.verify(token, "dev.Discord@111")
+        const { _id } = decodedObj
+        const user = await User.findById(_id)
+        if (!user) {
+            throw new Error("User Not Found")
+        }
+        req.user = user
         next()
-    }
-}
-const adminCheck = (req, res, next) => {
-    const isAuthValid = "token" === "token"
-    console.log("admin auth is called")
-    if (!isAuthValid) {
-        res.status(401).send("UnAuthorized user")
-    } else {
-        next()
+    } catch (err) {
+        res.status(400).send("ERROR : " + err)
     }
 }
 module.exports = {
-    authCheck, adminCheck
+    userAuth
 }
